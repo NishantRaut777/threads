@@ -6,6 +6,7 @@ import { ChakraProvider, extendTheme } from '@chakra-ui/react';
 import { mode } from "@chakra-ui/theme-tools";
 import { ColorModeScript } from '@chakra-ui/react';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { RecoilRoot } from 'recoil';
 
 // following code helps to switch between light and dark theme. first color is light theme color whereas second one is dark color
 const styles = {
@@ -33,11 +34,13 @@ const theme = extendTheme({ config, styles, colors });
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <Router>
-      <ChakraProvider theme={theme}>
-        <ColorModeScript initialColorMode={theme.config.initialColorMode} />
-        <App />
-      </ChakraProvider>
-    </Router>
+    <RecoilRoot>
+      <Router>
+        <ChakraProvider theme={theme}>
+          <ColorModeScript initialColorMode={theme.config.initialColorMode} />
+          <App />
+        </ChakraProvider>
+      </Router>
+    </RecoilRoot>
   </React.StrictMode>,
 )

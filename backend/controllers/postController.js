@@ -154,11 +154,10 @@ const getFeedPosts = async(req,res) => {
         if(!user){
             return res.status(404).json({ message: "User not found" });
         }
-        console.log("User Found");
 
         // get users followed by loggedIn user.
         const following = user.following;
-        console.log(following);
+        
         // get posts of followed users in reverse order
         const feedPosts = await Post.find({ postedBy: { $in: following } }).sort({ createdAt: -1 });
 
