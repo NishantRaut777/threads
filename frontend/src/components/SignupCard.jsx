@@ -13,17 +13,65 @@ import {
   Text,
   useColorModeValue,
   Link,
+  useToast,
 } from '@chakra-ui/react'
 import { useState } from 'react'
 import { ViewIcon, ViewOffIcon } from '@chakra-ui/icons'
 import { useSetRecoilState } from 'recoil';
 import authScreenAtom from '../atoms/authAtom';
+import useShowToast from '../hooks/useShowToast';
+import userAtom from '../atoms/userAtom';
 
 export default function SignupCard() {
-  const [showPassword, setShowPassword] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
-  // this works as a setstate and setting the state of authscreen
-  const setAuthScreenState = useSetRecoilState(authScreenAtom);
+    // this works as a setstate and setting the state of authscreen
+    const setAuthScreenState = useSetRecoilState(authScreenAtom);
+
+    // calling showToast
+    const showToast = useShowToast();
+
+    const setUserState = useSetRecoilState(userAtom);
+
+    //   Handling inputs
+    const [inputs,setInputs] = useState({
+        name: "",
+        username: "",
+        email: "",
+        password: ""
+    });
+
+    
+    //   Handling SIGN UP
+    const handleSignup = async () => {
+        try{
+            const res = await fetch("/api/users/signup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(inputs)
+            });
+
+            const data = await res.json();
+            
+            if(data.error){
+                showToast("ERROR", data.error, "error");
+                
+                // After displaying toast  return from this function
+                return;
+            }
+
+            // If signup is successful save the data in localStorage and set the user state.
+            localStorage.setItem("user-threads", JSON.stringify(data));
+            
+            setUserState(data);
+
+        } catch(err){
+            showToast("ERROR", err, "error");
+        }
+  };
+
 
   return (
     <Flex
@@ -48,24 +96,36 @@ export default function SignupCard() {
               <Box>
                 <FormControl  isRequired>
                   <FormLabel>Full Name</FormLabel>
-                  <Input type="text" />
+                  <Input type="text" 
+                    onChange={(e) => setInputs({...inputs, name: e.target.value})}
+                    value={inputs.name}
+                  />
                 </FormControl>
               </Box>
               <Box>
                 <FormControl isRequired>
                   <FormLabel>Username</FormLabel>
-                  <Input type="text" />
+                  <Input type="text" 
+                    onChange={(e) => setInputs({...inputs, username: e.target.value})}
+                    value={inputs.username}
+                  />
                 </FormControl>
               </Box>
             </HStack>
             <FormControl isRequired>
               <FormLabel>Email address</FormLabel>
-              <Input type="email" />
+              <Input type="email" 
+                onChange={(e) => setInputs({...inputs, email: e.target.value})}
+                    value={inputs.email}
+              />
             </FormControl>
             <FormControl isRequired>
               <FormLabel>Password</FormLabel>
               <InputGroup>
-                <Input type={showPassword ? 'text' : 'password'} />
+                <Input type={showPassword ? 'text' : 'password'} 
+                    onChange={(e) => setInputs({...inputs, password: e.target.value})}
+                    value={inputs.password}
+                />
                 <InputRightElement h={'full'}>
                   <Button
                     variant={'ghost'}
@@ -83,7 +143,9 @@ export default function SignupCard() {
                 color={'white'}
                 _hover={{
                   bg: useColorModeValue("gray.700", "gray.800"),
-                }}>
+                }}
+                onClick={handleSignup}
+                >
                 Sign up
               </Button>
             </Stack>
