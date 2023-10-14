@@ -2,6 +2,8 @@ import User from "../models/userModel.js";
 import bcrypt from "bcryptjs";
 import generateTokenAndSetCookie from "../utils/helpers/generateTokenAndSetCookie.js";
 
+import { v2 as cloudinary } from "cloudinary";
+
 // GET USER BY USERNAME
 const getUserProfile = async(req,res) => {
     const { username } = req.params;
@@ -58,7 +60,9 @@ const signupUser = async(req,res) => {
                 _id: newUser._id,
                 name: newUser.name,
                 email: newUser.email,
-                username: newUser.username
+                username: newUser.username,
+                bio: newUser.bio,
+                profilePic: newUser.profilePic
             });
         } else{
             res.status(400).json({ error: "Invalid User Data" });
@@ -89,7 +93,9 @@ const loginUser = async(req,res) => {
             _id: user._id,
             name: user.name,
             email: user.email,
-            username: user.username
+            username: user.username,
+            bio: user.bio,
+            profilePic: user.profilePic
         });
     } catch(err){
         res.status(500).json({ error: err.message });
@@ -162,7 +168,11 @@ const followUnfollowUser = async(req,res) => {
 // UPDATE USER
 const updateUser = async(req,res) => {
     try {
-        const { name, email, username, password, profilePic, bio} = req.body;
+        const { name, email, username, password, bio} = req.body;
+
+        // profilePic is declared with let because it will be modified here
+        let { profilePic } = req.body;
+
         // getting the userId from middleware function
         const userId = req.user._id;
 
@@ -183,6 +193,17 @@ const updateUser = async(req,res) => {
             user.password = hashedPassword;
         }
 
+        // if profilePic is passed then upload that image in cloudinary and assign url of it to the variable
+        if(profilePic){
+            // if user already has profilePic then remove that profilePic first from cloudinary
+            if(user.profilePic){
+                await cloudinary.uploader.destroy(user.profilePic.split("/").pop().split(".")[0]);
+            }
+
+            const uploadedResponse = await cloudinary.uploader.upload(profilePic);
+            profilePic = uploadedResponse.secure_url;
+        }
+
         // assigning values
         user.name = name || user.name;
         user.email = email || user.email;
@@ -193,7 +214,9 @@ const updateUser = async(req,res) => {
         // saving new user
         user = await user.save();
 
-        res.status(200).json({ message: "Profile updated successfully", user });
+        user.password = null;
+
+        res.status(200).json( user );
 
     } catch (err) {
         res.status(500).json({ error: err.message });
