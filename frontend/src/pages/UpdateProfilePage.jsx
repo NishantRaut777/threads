@@ -32,6 +32,8 @@ export default function UpdateProfilePage() {
     // this will have file name 
     const fileRef = useRef(null);
 
+    const [updating, setUpdating] = useState(false);
+
     const showToast = useShowToast();
 
     // usePreviewImg hook handles image change
@@ -40,6 +42,9 @@ export default function UpdateProfilePage() {
     // handling formsubmit
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (updating) return;
+
+        setUpdating(true);
 
         try {
             // update API CALL
@@ -65,8 +70,10 @@ export default function UpdateProfilePage() {
             localStorage.setItem("user-threads", JSON.stringify(data));
         } catch (error) {
             showToast("Error", error, "error");
+        } finally {
+            setUpdating(false);
         }
-    }
+    };
 
   return (
     <form onSubmit={handleSubmit}>
@@ -179,6 +186,7 @@ export default function UpdateProfilePage() {
               bg: 'green.500',
             }}
             type='submit'
+            isLoading = {updating}
             >
             Submit
           </Button>
