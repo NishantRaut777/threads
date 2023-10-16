@@ -21,7 +21,8 @@ cloudinary.config({
 });
 
 // To parse JSON data in req.body
-app.use(express.json());
+// limit value is useful to specify maximum req.body() size. In this it was useful to upload large images
+app.use(express.json({ limit: "50mb" }));
 
 // To parse form data in req.body
 app.use(express.urlencoded({ extended: true }));
