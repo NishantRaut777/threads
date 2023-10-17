@@ -16,7 +16,7 @@ const UserHeader = ({ user }) => {
     const currentUser = useRecoilValue(userAtom);
 
     // set the following state depending on condition
-    const [following, setFollowing] = useState(user.followers.includes(currentUser._id));
+    const [following, setFollowing] = useState(user.followers.includes(currentUser?._id));
     
     const showToast = useShowToast();
 
@@ -67,7 +67,7 @@ const UserHeader = ({ user }) => {
                 user.followers.pop();
             } else {
                 showToast("Success", `Followed ${user.name}`, "success");
-                user.followers.push(currentUser._id);
+                user.followers.push(currentUser?._id);
             }
 
             // once followed or unfollowed reverse the state
@@ -125,13 +125,13 @@ const UserHeader = ({ user }) => {
         <Text>{user.bio}</Text>
         
         {/* If logged in user id is same as searched user id then display update profile button else display follow unfollow button */}
-        { currentUser._id === user._id && (
+        { currentUser?._id === user._id && (
             <Link as={RouterLink} to="/update">
                 <Button size={"sm"}>Update Profile</Button>
             </Link>
         )}
 
-        { currentUser._id !== user._id && (
+        { currentUser?._id !== user._id && (
             <Button size={"sm"} onClick={handleFollowUnfollow} 
             isLoading = {updating}
             >
