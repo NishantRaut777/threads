@@ -1,43 +1,48 @@
 import React, { useEffect, useState } from 'react'
-import UserHeader from '../components/UserHeader'
-import UserPost from '../components/UserPost'
+import UserHeader from '../components/UserHeader';
 import { useParams } from 'react-router-dom';
 import useShowToast from '../hooks/useShowToast';
 import { Flex, Spinner } from '@chakra-ui/react';
+import Post from "../components/Post";
+import useGetUserProfile from '../hooks/useGetUserProfile';
 
 const UserPage = () => {
 
-  const [user, setUser] = useState(null);
+  // using useGetUserProfile hook
+  const { user, loading } = useGetUserProfile();
 
   // useparams hook will give access to value passed in url
   const { username } = useParams();
 
   const showToast = useShowToast();
 
-  const [loading, setLoading] = useState(true);
+  const [posts, setPosts] = useState([]);
 
-  // calling getUserby name in useEffect
+  const [fetchingPosts, setFetchingPosts] = useState(true);
+
+  // calling getUserby name and getposts in useEffect
   useEffect(() => {
-    const getUser = async () => {
+    
+
+    const getPosts = async () => {
+      setFetchingPosts(true);
       try {
-        const res = await fetch(`/api/users/profile/${username}`);
-
+        const res = await fetch(`/api/posts/user/${username}`);
         const data = await res.json();
-        if(data.error){
-          showToast("Error", data.error, "error");
-          return;
-        }
+        console.log(data);
 
-        setUser(data);
+        setPosts(data);
 
-      } catch(err){
-        showToast("Error", err , "error");
+      } catch (err) {
+        showToast("Error", err.message, "error");
+        setPosts([]);
       } finally {
-        setLoading(false);
+        setFetchingPosts(false);
       }
     };
 
-    getUser();
+    
+    getPosts();
   }, [username, showToast]);
 
   if(!user && loading){
@@ -56,10 +61,19 @@ const UserPage = () => {
   return (
     <>
         <UserHeader user= {user} />
-        <UserPost likes={1200} replies={400} postImg="/post1.png" postTitle="Let's talk about threads." />
-        <UserPost likes={1000} replies={300} postImg="/post2.png" postTitle="Nice tutorial." />
-        <UserPost likes={22200} replies={1000} postImg="/post3.png" postTitle="I love Elon." />
-        <UserPost likes={120} replies={50} postTitle="This is my first thread." />
+
+        {/* If fetching posts is false and there are no posts then display this message */}
+        { !fetchingPosts && posts.length === 0 && <h1>User doesn't have any posts.</h1>}
+
+        { fetchingPosts && (
+          <Flex justifyContent={"center"} my={12}>
+            <Spinner size={"xl"}/>
+          </Flex>
+        )} 
+
+        { posts.map((post) => (
+          <Post  key={post._id} post={post} postedBy={post.postedBy} />
+        ))}
     </>
   )
 }
