@@ -4,17 +4,17 @@ import { useParams } from 'react-router-dom';
 import useShowToast from '../hooks/useShowToast';
 import { Flex, Spinner } from '@chakra-ui/react';
 import Post from "../components/Post";
+import useGetUserProfile from '../hooks/useGetUserProfile';
 
 const UserPage = () => {
 
-  const [user, setUser] = useState(null);
+  // using useGetUserProfile hook
+  const { user, loading } = useGetUserProfile();
 
   // useparams hook will give access to value passed in url
   const { username } = useParams();
 
   const showToast = useShowToast();
-
-  const [loading, setLoading] = useState(true);
 
   const [posts, setPosts] = useState([]);
 
@@ -22,24 +22,7 @@ const UserPage = () => {
 
   // calling getUserby name and getposts in useEffect
   useEffect(() => {
-    const getUser = async () => {
-      try {
-        const res = await fetch(`/api/users/profile/${username}`);
-
-        const data = await res.json();
-        if(data.error){
-          showToast("Error", data.error, "error");
-          return;
-        }
-
-        setUser(data);
-
-      } catch(err){
-        showToast("Error", err.message , "error");
-      } finally {
-        setLoading(false);
-      }
-    };
+    
 
     const getPosts = async () => {
       setFetchingPosts(true);
@@ -58,7 +41,7 @@ const UserPage = () => {
       }
     };
 
-    getUser();
+    
     getPosts();
   }, [username, showToast]);
 

@@ -10,7 +10,7 @@ const Actions = ({ post : post_ }) => {
   const user = useRecoilValue(userAtom);
 
   // depending upon condition set liked state
-  const [liked, setLiked] = useState(post_.likes.includes(user?._id));
+  const [liked, setLiked] = useState(post_?.likes.includes(user?._id));
 
   const showToast = useShowToast();
 
@@ -153,11 +153,11 @@ const Actions = ({ post : post_ }) => {
 
       <Flex gap={2} alignItems={"center"}>
         <Text color={"gray.light"} fontSize={"sm"}>
-          {post.replies.length} replies
+          {post?.replies.length} replies
         </Text>
         <Box w={0.5} h={0.5} borderRadius={"full"} bg={"gray.light"}></Box>
         <Text color={"gray.light"} fontSize={"sm"}>
-          {post.likes.length} likes
+          {post?.likes.length} likes
         </Text>
       </Flex>
 
